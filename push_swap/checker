@@ -1,0 +1,197 @@
+#!/bin/bash
+# Reset
+Color_Off='\033[0m'       # Text Reset
+
+# Regular Colors
+Red='\033[0;31m'          # Red
+Green='\033[0;32m'        # Green
+Cyan='\033[0;36m'         # Cyan
+
+# Bold
+BRed='\033[1;31m'         # Red
+BGreen='\033[1;32m'       # Green
+BCyan='\033[1;36m'        # Cyan
+BWhite='\033[1;37m'       # White
+
+ERROR_OCCURED="FALSE"
+test_error_input(){
+	echo -e "       ${BCyan}[Error checks]${Color_Off}\n"
+	numbers="1 28 9 2147483648"
+	leaks -atExit -- ./push_swap $numbers > leaks_output.txt 2>/dev/null
+	if grep -qE '0 leaks for 0 total leaked bytes\.' leaks_output.txt; then
+		leaks_check="OK"
+		leaks_check_color=$BGreen
+	else
+		leaks_check="KO"
+		leaks_check_color=$BRed
+	fi
+	outcome=$(./push_swap $numbers)
+	if [[ $outcome =~ "Error" ]]; then
+		echo -e "MAX_INT ${BGreen}[OK]${Color_Off} · LEAKS ${leaks_check_color}[$leaks_check]${Color_Off}"
+	else
+		echo -e "MAX_INT ${BRed}[KO]${Color_Off} · LEAKS ${leaks_check_color}[$leaks_check]${Color_Off}"
+		ERROR_OCCURED="TRUE"
+	fi
+	numbers="1 28 9 -2147483649"
+	leaks -atExit -- ./push_swap $numbers > leaks_output.txt 2>/dev/null
+	if grep -qE '0 leaks for 0 total leaked bytes\.' leaks_output.txt; then
+		leaks_check="OK"
+		leaks_check_color=$BGreen
+	else
+		leaks_check="KO"
+		leaks_check_color=$BRed
+	fi
+	outcome=$(./push_swap $numbers)
+	if [[ $outcome =~ "Error" ]]; then
+		echo -e "MIN_INT ${BGreen}[OK]${Color_Off} · LEAKS ${leaks_check_color}[$leaks_check]${Color_Off}"
+	else
+		echo -e "MIN_INT ${BRed}[KO]${Color_Off} · LEAKS ${leaks_check_color}[$leaks_check]${Color_Off}"
+		ERROR_OCCURED="TRUE"
+	fi
+	numbers="-90 2 8 10 374 2147483647"
+	leaks -atExit -- ./push_swap $numbers > leaks_output.txt 2>/dev/null
+	if grep -qE '0 leaks for 0 total leaked bytes\.' leaks_output.txt; then
+		leaks_check="OK"
+		leaks_check_color=$BGreen
+	else
+		leaks_check="KO"
+		leaks_check_color=$BRed
+	fi
+	outcome=$(./push_swap $numbers)
+	if [ -z "$outcome" ]; then
+		echo -e "PSORTED ${BGreen}[OK]${Color_Off} · LEAKS ${leaks_check_color}[$leaks_check]${Color_Off}"
+	else
+		echo -e "PSORTED ${BRed}[KO]${Color_Off} · LEAKS ${leaks_check_color}[$leaks_check]${Color_Off}"
+		ERROR_OCCURED="TRUE"
+	fi
+	numbers="-90 -90 2 8 10 374 2147483647 347878 478324723 354534 633148 828347123"
+	leaks -atExit -- ./push_swap $numbers > leaks_output.txt 2>/dev/null
+	if grep -qE '0 leaks for 0 total leaked bytes\.' leaks_output.txt; then
+		leaks_check="OK"
+		leaks_check_color=$BGreen
+	else
+		leaks_check="KO"
+		leaks_check_color=$BRed
+	fi
+	outcome=$(./push_swap $numbers)
+	if [[ $outcome =~ "Error" ]]; then
+		echo -e "DUPLICT ${BGreen}[OK]${Color_Off} · LEAKS ${leaks_check_color}[$leaks_check]${Color_Off}"
+	else
+		echo -e "DUPLICT ${BRed}[KO]${Color_Off} · LEAKS ${leaks_check_color}[$leaks_check]${Color_Off}"
+		ERROR_OCCURED="TRUE"
+	fi
+	numbers="1"
+	leaks -atExit -- ./push_swap $numbers > leaks_output.txt 2>/dev/null
+	if grep -qE '0 leaks for 0 total leaked bytes\.' leaks_output.txt; then
+		leaks_check="OK"
+		leaks_check_color=$BGreen
+	else
+		leaks_check="KO"
+		leaks_check_color=$BRed
+	fi
+	outcome=$(./push_swap $numbers)
+	if [ -z "$outcome" ]; then
+		echo -e "1 NUMBR ${BGreen}[OK]${Color_Off} · LEAKS ${leaks_check_color}[$leaks_check]${Color_Off}"
+	else
+		echo -e "1 NUMBR ${BRed}[KO]${Color_Off} · LEAKS ${leaks_check_color}[$leaks_check]${Color_Off}"
+		ERROR_OCCURED="TRUE"
+	fi
+	numbers="663 834 -83 73 377373 g 373"
+	leaks -atExit -- ./push_swap $numbers > leaks_output.txt 2>/dev/null
+	if grep -qE '0 leaks for 0 total leaked bytes\.' leaks_output.txt; then
+		leaks_check="OK"
+		leaks_check_color=$BGreen
+	else
+		leaks_check="KO"
+		leaks_check_color=$BRed
+	fi
+	outcome=$(./push_swap $numbers)
+	if [[ $outcome =~ "Error" ]]; then
+		echo -e "NON_INT ${BGreen}[OK]${Color_Off} · LEAKS ${leaks_check_color}[$leaks_check]${Color_Off}"
+	else
+		echo -e "NON_INT ${BRed}[KO]${Color_Off} · LEAKS ${leaks_check_color}[$leaks_check]${Color_Off}"
+		ERROR_OCCURED="TRUE"
+	fi
+	echo -e ""
+}
+
+numbers_random=""
+
+random_numbers() {
+	MIN_INT=-2147483648
+	MAX_INT=2147483647
+
+	# Generate the numbers
+	for i in $(seq 1 "$1"); do
+		while true; do
+			num=$((RANDOM % (MAX_INT - MIN_INT + 1) + MIN_INT))
+			if ! [[ "$numbers_random" =~ "$num" ]]; then
+				numbers_random="$numbers_random $num"
+				break
+			fi
+		done
+	done
+}
+
+test_normal_input(){
+	echo -e "       ${BCyan}[$1 Numbers]${Color_Off}\n"
+	for (( j=1; j<=$2; j++ ))
+	do
+		check=$3
+		if [[ "$check" == "y" ]]; then
+			random_numbers $1
+			numbers=$numbers_random
+		else 
+			numbers=$(seq $1 | sort -R | tr '\n' ' ')
+		fi
+
+		leaks -atExit -- ./push_swap $numbers > leaks_output.txt
+		if grep -qE '0 leaks for 0 total leaked bytes\.' leaks_output.txt; then
+			leaks_check="OK"
+			leaks_check_symbol="✔︎"
+			leaks_check_color=$BGreen
+		else
+			leaks_check="KO"
+			leaks_check_symbol="✗"
+			leaks_check_color=$BRed
+		fi
+		operations=$(./push_swap $numbers | wc -l | xargs)
+		outcome="$(./push_swap $numbers | ./checker_Mac $numbers)"
+
+		check_color=$BGreen
+		check_symbol="✔︎"
+		if [[ $outcome =~ "KO" || -z "$outcome" ]]; then
+			check_color=$BRed
+			check_symbol="✗"
+			ERROR_OCCURED="$1"
+		fi
+		echo -e "${White}[$j] ${BWhite}Operations: ${BCyan}$operations${BWhite} · Checker: ${check_color}$outcome$check_symbol${BWhite} · Leaks: ${leaks_check_color}$leaks_check$leaks_check_symbol${Color_Off}"
+		numbers_random=""
+	done
+	echo -e ""
+}
+
+read -p $'\n\e[1;36mEnter amount of numbers: \e[1;37m' AMOUNT
+
+if [ -z "$AMOUNT" ]; then
+	echo -e "${Color_Off}-----------------------------"
+	test_error_input
+	test_normal_input 3 5 "y"
+	test_normal_input 5 5 "y"
+	test_normal_input 100 5 "y"
+	test_normal_input 500 5 "y"
+	if [[ $ERROR_OCCURED =~ "FALSE" ]]; then
+		echo -e "-----------------------------------"
+		echo -e "|${BGreen}  ✔︎ Congrats all checks passed!${Color_Off}  |"
+		echo -e "-----------------------------------"
+	else
+		echo -e "----------------------------------------"
+		echo -e "|${BRed}  ✗ An error occured during testing!${Color_Off}  |"
+		echo -e "----------------------------------------"
+	fi
+else
+	read -p $'\e[1;36mEnter amount of tests: \e[1;37m' TESTS
+	read -p $'\e[1;36mRandom numbers? [y/n]: \e[1;37m' CHECK_RANDOM
+	echo -e "${Color_Off}-----------------------------"
+	test_normal_input $AMOUNT $TESTS $CHECK_RANDOM
+fi
