@@ -1,0 +1,62 @@
+version: "3.5"
+
+services:
+  nginx:
+    container_name: nginx
+    build: ./requirements/nginx/.
+    image: nginx:42
+    ports:
+     - "443:443"
+    depends_on:
+      - wordpress
+    volumes:
+     - wordpress:/var/www/html
+    networks:
+      - connection
+    env_file:
+      - .env
+    restart: always
+  wordpress:
+    container_name: wordpress
+    build: ./requirements/wordpress/.
+    image: wordpress:42
+    depends_on:
+      - mariadb
+    volumes:
+      - wordpress:/var/www/html
+    env_file:
+      - .env
+    networks:
+      - connection
+    restart: always
+  mariadb:
+    container_name: mariadb
+    build: ./requirements/mariadb/.
+    image: mariadb:42
+    volumes:
+      - mariadb:/var/lib/mysql
+    env_file:
+      - .env
+    networks:
+      - connection
+    restart: always
+
+networks:
+  connection:
+    name: connection
+
+volumes:
+  wordpress:
+    name: wordpress
+    driver: local
+    driver_opts:
+      device: /home/tvan-bee/data/wordpress
+      o: bind
+      type: none
+  mariadb:
+    name: mariadb
+    driver: local
+    driver_opts:
+      device: /home/tvan-bee/data/mariadb
+      o: bind
+      type: none
