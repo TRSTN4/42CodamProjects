@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CGI Scripts - Webserv</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <header>
+        <h1>Execute CGI Scripts</h1>
+    </header>
+
+    <!-- Navigation Bar -->
+    <nav>
+        <a href="index.html">GET</a>
+        <a href="post.html">POST</a>
+        <a href="delete.html">DELETE</a>
+        <a href="cgi.html">CGI</a>
+    </nav>
+
+    <!-- Main content area -->
+    <main>
+        <section class="intro">
+            <h2>Available CGI Scripts</h2>
+            <p>Select a script from the list below and see its output.</p>
+
+            <div class="cgi-scripts">
+                <!-- GET forms -->
+                <form action="cgi-bin/test.py" method="GET">
+                    <button type="submit">Execute test.py (GET)</button>
+                </form>
+                <form action="cgi-bin/test.sh" method="GET">
+                    <button type="submit">Execute test.sh (GET)</button>
+                </form>
+                <form action="cgi-bin/test.cgi" method="GET">
+                    <button type="submit">Execute test.cgi (GET)</button>
+                </form>
+                <form action="cgi-bin/timeout.py" method="GET">
+                    <button type="submit">Execute timeout.py (GET)</button>
+                </form>
+                <form action="cgi-bin/relative.py" method="GET">
+                    <button type="submit">Execute relative.py (GET)</button>
+                </form>
+
+                <!-- POST forms -->
+                <h3>Execute CGI Scripts with POST</h3>
+
+                <form action="cgi-bin/post.py" method="POST">
+                    <label for="name">Name:</label>
+                    <input type="text" id="name" name="name" required><br>
+                    <label for="age">Age:</label>
+                    <input type="text" id="age" name="age" required><br>
+                    <button type="submit">Execute test.py (POST)</button>
+                </form>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        &copy; 2024 My Website. All rights reserved.
+    </footer>
+</body>
+</html>
