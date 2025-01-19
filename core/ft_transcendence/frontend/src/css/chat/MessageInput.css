@@ -1,0 +1,25 @@
+.send-button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 80px;
+  cursor: pointer;
+  padding: 10px 20px;
+  margin-left: 10px;
+}
+
+.message-input {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 80px;
+  margin-right: 10px;
+  font-size: 1rem;
+  border: 2px solid #c3c3c3;
+  transition: all 0.3s;
+}
+
+.message-input:focus {
+  outline: none;
+  border-color: #686868;
+}

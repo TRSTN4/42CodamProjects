@@ -1,0 +1,6 @@
+EMAIL_PASSWORD=xddi zuud ovps kuca
+FRONTEND_URL="https://localhost:8080"
+CLIENT_ID=u-s4t2ud-26a00b8c4f50b9d41a3beb8c337040dd4e893271fc1d5698ab77f06808af0892
+CLIENT_SECRET=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
+REDIRECT_URI="https://localhost:8080/api/users/42_callback/"
+AUTHORIZATION_URL="https://api.intra.42.fr/oauth/authorize?client_id=u-s4t2ud-26a00b8c4f50b9d41a3beb8c337040dd4e893271fc1d5698ab77f06808af0892&redirect_uri=https%3A%2F%2Flocalhost%3A8080%2Fapi%2Fusers%2F42_callback%2F&response_type=code"

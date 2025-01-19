@@ -1,0 +1,77 @@
+.list-container {
+  padding: 10px;
+  overflow-y: auto;
+  background-color: #f9f9f9;
+  scroll-behavior: smooth; /* enable smooth scrolling */
+  display: flex;
+  flex-direction: column;
+}
+
+.message-list-header {
+  font-size: 1.5rem;
+  margin-bottom: 10px;
+  background: radial-gradient(
+    780px at 37.8% 100.3%,
+    rgb(19, 55, 115) 2.2%,
+    rgb(32, 7, 80) 20.2%,
+    rgb(27, 88, 111) 58.6%,
+    rgb(115, 88, 44) 75%,
+    rgb(99, 19, 90) 89.6%,
+    rgb(12, 51, 76) 96.1%
+  );
+  border-top-left-radius: 15px;
+  width: 100%;
+  font-family: Rubik;
+  color: white;
+}
+
+/* Base styling for the message item container */
+.message-item-container {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 10px;
+}
+
+/* Text bubble styling */
+.message-bubble {
+  display: inline-block;
+  padding: 10px 15px;
+  border-radius: 20px;
+  max-width: 60%;
+  word-wrap: break-word; /* Ensures long messages wrap correctly */
+}
+
+/* Sent messages (blue bubble) */
+.message-own {
+  background-color: #c4c4c4; /* Blue for sent messages */
+  color: rgb(0, 0, 0);
+  align-self: flex-end;
+}
+
+/* Received messages (green bubble) */
+.message-other {
+  background-color: #c4c4c4; /* Green for received messages */
+  color: black;
+  align-self: flex-start;
+}
+
+.message-dm {
+  background-color: #c4c4c4; /* White for direct messages */
+  color: black;
+  align-self: flex-start;
+}
+
+/* Sender name styling */
+.sender-own {
+  font-size: 12px;
+  color: #555;
+  margin-top: 5px; /* Add space between bubble and sender name */
+  align-self: flex-end; /* Align sender name below the message */
+}
+
+.sender-other {
+  font-size: 12px;
+  color: #555;
+  margin-top: 5px; /* Add space between bubble and sender name */
+  align-self: flex-start; /* Align sender name below the message */
+}

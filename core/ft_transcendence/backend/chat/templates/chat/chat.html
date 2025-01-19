@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>transcendence live chat</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2d3436;
+            color: #dfe6e9;
+            margin: 0;
+            padding: 20px;
+        }
+        #username-prompt, #room-section, #chat-section, #direct-chat-box, #blocked-users {
+            display: none;
+            text-align: center;
+            margin-top: 50px;
+        }
+        #username-prompt input, #room-section input, #chat-section input, #direct-chat-box input {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px 0;
+            width: 80%;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 10px 5px;
+            background-color: #0984e3;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #74b9ff;
+        }
+        textarea {
+            width: 80%;
+            height: 200px;
+            margin: 10px auto;
+            display: block;
+            padding: 10px;
+            font-size: 16px;
+            background-color: #636e72;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            resize: none;
+        }
+        #online-users, #blocked-users {
+            margin-top: 20px;
+            text-align: left;
+            background-color: #353b48;
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+            width: 80%;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        #blocked-users {
+            background-color: #d63031;
+        }
+        #online-users div, #blocked-users div {
+            margin-bottom: 10px;
+        }
+        .user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .user-item button {
+            margin-left: 10px;
+        }
+    </style>
+    <script>
+        let ws = null;
+        let currentRecipient = null;
+
+        window.onload = function() {
+            document.getElementById('username-prompt').style.display = 'block';
+            // load blocked users list from sessionStorage
+            loadBlockedUsers();
+        };
+
+        function setUsername() {
+            const usernameInput = document.getElementById('username-input');
+            const username = usernameInput.value.trim();
+            if (!username) {
+                alert('Please enter a valid username!');
+                return;
+            }
+
+            sessionStorage.setItem('username', username);
+
+            // initialize blocked users list in sessionStorage if not present
+            if (!sessionStorage.getItem('blocked_users')) {
+                sessionStorage.setItem('blocked_users', JSON.stringify([]));
+            }
+
+            // display the current username
+            document.getElementById('current-username').textContent = username;
+
+            // load blocked users into div box
+            loadBlockedUsers();
+
+            document.getElementById('username-prompt').style.display = 'none';
+            document.getElementById('room-section').style.display = 'block';
+
+            console.log(`Username set to: ${username}`);
+        }
+
+        function connectToRoom() {
+            const roomName = document.getElementById('room-input').value.trim();
+            const username = sessionStorage.getItem('username');
+
+            // show alert
+            if (!roomName) {
+                alert('Please enter a room ID.');
+                return;
+            }
+            if (!username) {
+                alert('Please set a username first.');
+                return;
+            }
+
+            // close the existing WebSocket connection if any
+            if (ws)
+                ws.close();
+
+            // connect to the WebSocket server
+            const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+            ws = new WebSocket(`${wsProtocol}://${window.location.host}/ws/chat/${encodeURIComponent(roomName)}/?username=${encodeURIComponent(username)}`);
+
+            // when the WebSocket connection is open, show the chat section
+            ws.onopen = function() {
+                console.log('Connected to room:', roomName);
+
+                // show the chat section
+                document.getElementById('chat-log').value += `Joined room: ${roomName}\n`;
+                document.getElementById('chat-section').style.display = 'block';
+                
+                // reload blocked users ui box
+                loadBlockedUsers();
+            };
+
+            // handle incoming messages
+            ws.onmessage = function(event) {
+                // parse the incoming message to JSON
+                const data = JSON.parse(event.data);
+                
+                // get the current username and blocked users list
+                const username = sessionStorage.getItem('username');
+                const blockedUsers = JSON.parse(sessionStorage.getItem('blocked_users'));
+
+                if (data.type === "update_users") {
+                    // store the latest online users list in sessionStorage
+                    sessionStorage.setItem('online_users', JSON.stringify(data.users));
+                    // update the online users list in the Ui div box
+                    updateUserList(data.users);
+                } else if (data.type === "direct") {
+                    // check if the sender is blocked
+                    if (blockedUsers.includes(data.sender)) {
+                        // notify the user that a blocked user sent a direct message
+                        console.log(`Ignored message from blocked user '${data.sender}'.`);
+                        return;
+                    }
+                    openDirectChat(data.sender, data.message);
+                } else if (data.type === "chat") {
+                    // get the chat log element
+                    const chatLog = document.getElementById('chat-log');
+                    
+                    // if the sender is blocked, ignore the message
+                    if (blockedUsers.includes(data.sender)) {
+                        // notify the user that a blocked user sent a message
+                        console.log(`Ignored general message from blocked user '${data.sender}'.`);
+                        return;
+                    }
+
+                    // check if the sender is the current user
+                    if (data.sender === username) {
+                        // append the message to the chat log and mention 'You'
+                        chatLog.value += `You: ${data.message}\n`;
+                    } else {
+                        // append the message to the chat log
+                        chatLog.value += `${data.sender}: ${data.message}\n`;
+                    }
+                } else if (data.type === "error") {
+                    // show the error message
+                    alert(data.message);
+                } else if (data.type === "block_success") {
+                    // show the block success message
+                    alert(data.message);
+                } else if (data.type === "unblock_success") {
+                    // show the unblock success message
+                    alert(data.message);
+                } else {
+                    // log unknown message types
+                    console.log("Unknown message type:", data);
+                }
+            };
+
+            // handle WebSocket errors
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+            };
+
+            // handle WebSocket connection when closed
+            ws.onclose = function(event) {
+                console.log('Disconnected from room');
+
+                // log
+                if (event.wasClean) {
+                    console.log(`Closed cleanly, code=${event.code}, reason=${event.reason}`);
+                } else {
+                    console.log('Connection died');
+                }
+
+                // hide the chat section and direct chat box
+                document.getElementById('chat-section').style.display = 'none';
+                document.getElementById('direct-chat-box').style.display = 'none';
+                document.getElementById('online-users').style.display = 'none';
+                document.getElementById('blocked-users').style.display = 'none';
+            };
+        }
+
+        function updateUserList(users) {
+            console.log('Received online users:', users);
+
+            // get the online users list element
+            const userList = document.getElementById('online-users');
+            userList.innerHTML = '';
+
+            // check if there are no users online otherwise display the list and mention no users are online
+            if (users.length === 0) {
+                userList.innerHTML = '<p>No users are online.</p>';
+                return;
+            }
+
+            // create a heading for the online users list
+            const heading = document.createElement('h3');
+            heading.textContent = 'Online Users';
+            userList.appendChild(heading);
+
+            // get the blocked users list from sessionStorage
+            const blockedUsers = JSON.parse(sessionStorage.getItem('blocked_users'));
+
+            // iterate over the online users and create a div element for each user
+            users.forEach(user => {
+                if (user !== sessionStorage.getItem('username')) {
+                    const userItem = document.createElement('div');
+                    userItem.classList.add('user-item');
+                    userItem.textContent = user;
+
+                    // create Block or Unblock button based on blocked status
+                    const blockButton = document.createElement('button');
+                    if (blockedUsers.includes(user)) {
+                        blockButton.textContent = 'Unblock';
+                        blockButton.onclick = function () {
+                            unblockUser(user);
+                        };
+                    } else {
+                        blockButton.textContent = 'Block';
+                        blockButton.onclick = function () {
+                            blockUser(user);
+                        };
+                    }
+
+                    // create Message button only if not blocked
+                    const directButton = document.createElement('button');
+                    directButton.textContent = 'Message';
+                    directButton.onclick = function () {
+                        openDirectChat(user);
+                    };
+
+                    // disable Message button if user is blocked
+                    if (blockedUsers.includes(user)) {
+                        directButton.disabled = true;
+                        directButton.style.backgroundColor = '#b2bec3';
+                        directButton.title = 'You have blocked this user.';
+                    }
+
+                    // append the block and message buttons to the user item
+                    userItem.appendChild(blockButton);
+                    userItem.appendChild(directButton);
+                    userList.appendChild(userItem);
+                }
+            });
+
+            // show the online users section
+            userList.style.display = 'block';
+        }
+
+        function blockUser(user) {
+            // get the blocked users list from sessionStorage
+            let blockedUsers = JSON.parse(sessionStorage.getItem('blocked_users'));
+            // check if the user is not already blocked
+            if (!blockedUsers.includes(user)) {
+                blockedUsers.push(user);
+                sessionStorage.setItem('blocked_users', JSON.stringify(blockedUsers));
+                
+                // update ui box div
+                addBlockedUserToUI(user);
+                
+                // send block command to server
+                ws.send(JSON.stringify({
+                    command: "block",
+                    target_user: user
+                }));
+                
+                // refresh the online users list with the latest data
+                const onlineUsers = JSON.parse(sessionStorage.getItem('online_users')) || [];
+                updateUserList(onlineUsers);
+            }
+        }
+
+        function unblockUser(user) {
+            // get the blocked users list from sessionStorage
+            let blockedUsers = JSON.parse(sessionStorage.getItem('blocked_users'));
+            // check if the user is in the blocked users list
+            if (blockedUsers.includes(user)) {
+                // remove the user from the blocked users list
+                blockedUsers = blockedUsers.filter(u => u !== user);
+                sessionStorage.setItem('blocked_users', JSON.stringify(blockedUsers));
+                
+                // update ui box div
+                removeBlockedUserFromUI(user);
+                
+                // send unblock command to server
+                ws.send(JSON.stringify({
+                    command: "unblock",
+                    target_user: user
+                }));
+                
+                // refresh the online users list with the latest data
+                const onlineUsers = JSON.parse(sessionStorage.getItem('online_users')) || [];
+                updateUserList(onlineUsers);
+            }
+        }
+
+        function addBlockedUserToUI(user) {
+            // add the blocked user to the ui box div
+            const blockedList = document.getElementById('blocked-users-list');
+            const userItem = document.createElement('div');
+            userItem.id = `blocked-${user}`;
+            userItem.textContent = user;
+
+            // create an unblock button
+            const unblockButton = document.createElement('button');
+            unblockButton.textContent = 'Unblock';
+            // set the onclick event to unblock the user
+            unblockButton.onclick = function () {
+                unblockUser(user);
+            };
+
+            // append the unblock button to the user item
+            userItem.appendChild(unblockButton);
+            // append the user item to the blocked users list
+            blockedList.appendChild(userItem);
+
+            // show the blocked-users section
+            document.getElementById('blocked-users').style.display = 'block';
+        }
+
+        function removeBlockedUserFromUI(user) {
+            // remove the blocked user from the ui box div
+            const userItem = document.getElementById(`blocked-${user}`);
+            if (userItem) {
+                userItem.remove();
+            }
+
+            // hide the blocked-users section if no users are blocked
+            const blockedList = document.getElementById('blocked-users-list');
+            if (blockedList.children.length === 0) {
+                document.getElementById('blocked-users').style.display = 'none';
+            }
+        }
+
+        function loadBlockedUsers() {
+            // load blocked users from sessionStorage
+            const blockedUsersStr = sessionStorage.getItem('blocked_users');
+            // parse the blocked users list to an array
+            const blockedUsers = blockedUsersStr ? JSON.parse(blockedUsersStr) : [];
+            // add the blocked users to the ui box div
+            blockedUsers.forEach(user => {
+                addBlockedUserToUI(user);
+            });
+        }
+
+        function openDirectChat(user, incomingMessage = null) {
+            // check if the user is blocked
+            const blockedUsers = JSON.parse(sessionStorage.getItem('blocked_users'));
+            // if the user is blocked, show an alert and return
+            if (blockedUsers.includes(user)) {
+                alert(`You have blocked '${user}'. Unblock them to start a direct chat.`);
+                return;
+            }
+
+            // get the direct chat box element
+            const directChatBox = document.getElementById('direct-chat-box');
+            // set the current recipient
+            currentRecipient = user;
+
+            // display the current username in direct chat
+            const username = sessionStorage.getItem('username');
+            document.getElementById('current-direct-username').textContent = username;
+
+            // when an incoming message is present, display it in the chat log
+            if (incomingMessage) {
+                const chatLog = document.getElementById('direct-chat-log');
+                chatLog.value += `${user}: ${incomingMessage}\n`;
+            }
+
+            // set the recipient username in the chat box
+            document.getElementById('direct-chat-user').textContent = `Chat with ${user}`;
+            // show the direct chat box
+            directChatBox.style.display = 'block';
+        }
+
+        function sendDirectMessage() {
+            // get the message input field
+            const messageInput = document.getElementById('direct-message-input');
+            if (!messageInput) {
+                console.error('Direct message input field not found!');
+                return;
+            }
+
+            // trim the message and check if it's empty
+            const message = messageInput.value.trim();
+            if (!message) {
+                alert('Message cannot be empty!');
+                return;
+            }
+            // check if a recipient is selected
+            if (!currentRecipient) {
+                alert('No recipient selected for the direct message.');
+                return;
+            }
+
+            console.log(`Sending message: "${message}" to ${currentRecipient}`);
+
+            // send the direct message through the WebSocket
+            ws.send(JSON.stringify({
+                recipient: currentRecipient,
+                message: message
+            }));
+
+            // get the chat log element and append the message
+            const chatLog = document.getElementById('direct-chat-log');
+            chatLog.value += `You: ${message}\n`;
+            
+            // clear the input field after sending the message
+            messageInput.value = ''; 
+        }
+
+        function sendGeneralMessage() {
+            // get the message input field
+            const messageInput = document.getElementById('message-input');
+            if (!messageInput) {
+                console.error('General message input field not found!');
+                return;
+            }
+
+            // trim the message and check if it's empty
+            const message = messageInput.value.trim();
+            if (!message) {
+                alert('Message cannot be empty!');
+                return;
+            }
+
+            console.log(`Sending general message: "${message}"`);
+
+            // send the general message through the WebSocket
+            ws.send(JSON.stringify({
+                message: message
+            }));
+
+            // clear the input field after sending the message
+            messageInput.value = '';
+        }
+    </script>
+</head>
+<body>
+    <div id="username-prompt">
+        <h1>Welcome to the Chat!</h1>
+        <p>Please enter your username to continue:</p>
+        <input id="username-input" type="text" placeholder="Enter your username">
+        <button onclick="setUsername()">Enter</button>
+    </div>
+
+    <div id="room-section">
+        <h1>Join a Room</h1>
+        <input id="room-input" type="text" placeholder="Enter room ID">
+        <button onclick="connectToRoom()">Join Room</button>
+    </div>
+
+    <div id="chat-section">
+        <p>Logged in as: <strong id="current-username"></strong></p>
+        <textarea id="chat-log" readonly></textarea><br>
+        <input id="message-input" type="text" placeholder="Enter your message">
+        <button onclick="sendGeneralMessage()">Send</button>
+        <div id="online-users"></div>
+    </div>
+
+    <div id="direct-chat-box" style="display:none; margin-top:20px;">
+        <h2 id="direct-chat-user"></h2>
+        <p>Logged in as: <strong id="current-direct-username"></strong></p>
+        <textarea id="direct-chat-log" readonly></textarea><br>
+        <input id="direct-message-input" type="text" placeholder="Type a message">
+        <button onclick="sendDirectMessage()">Send</button>
+    </div>
+
+    <div id="blocked-users" style="display:none; margin-top:20px;">
+        <h3>Blocked Users</h3>
+        <div id="blocked-users-list"></div>
+    </div>
+</body>
+</html>

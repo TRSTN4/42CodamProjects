@@ -1,0 +1,39 @@
+.user-card {
+  background-color: #f1f1f1;
+  border-radius: 10px;
+  padding: 0.8rem;
+  width: 100%;
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+}
+
+.user-card-item {
+  padding: 0;
+}
+
+.actions-button {
+  margin-left: 5px;
+  padding: 5px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.user-item {
+  margin-bottom: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.font-weight-bold {
+  font-weight: bold;
+}
+
+.font-weight-normal {
+  font-weight: normal;
+}
+
+.input-container {
+  display: flex;
+  padding: 10px;
+  border-top: 1px solid #ddd;
+}

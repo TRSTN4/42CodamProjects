@@ -1,0 +1,29 @@
+.logo-42 {
+  width: 28px;
+  height: 28px;
+}
+
+.login-button {
+  color: rgb(226, 226, 226);
+  width: 100%;
+  background: radial-gradient(
+    780px at 37.8% 100.3%,
+    rgb(19, 55, 115) 2.2%,
+    rgb(32, 7, 80) 20.2%,
+    rgb(27, 88, 111) 58.6%
+  );
+  font-size: 1.15rem;
+  text-decoration: none;
+  font-weight: 500;
+  font-family: Rubik;
+  transition: all 1s ease;
+}
+
+.login-button:hover {
+  color: rgb(255, 255, 255);
+  width: 100%;
+  font-size: 1.15rem;
+  text-decoration: none;
+  font-weight: 600;
+  border-radius: 25px;
+}

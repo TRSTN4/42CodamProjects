@@ -1,0 +1,305 @@
+.overlap-group-wrapper {
+  position: relative;
+  width: 1000px;
+  height: 600px;
+  border: 5px solid white;
+  background-color: black;
+  margin: 0 auto;
+  margin-top: 6rem;
+}
+
+.overlap-group {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+.paddle-a,
+.paddle-b {
+  position: absolute;
+  width: 10px;
+  height: 100px;
+  background-color: white;
+}
+
+.paddle-a {
+  left: 0;
+}
+
+.paddle-b {
+  right: 0;
+}
+
+.ball {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background-color: white;
+}
+
+.overlap {
+  position: absolute;
+  top: 10px;
+  left: 0;
+  width: 100%;
+  height: 50px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.score {
+  padding-top: 10%;
+  font-size: 80px;
+  font-weight: bold;
+  text-align: center;
+  margin: 0;
+  color: white;
+}
+
+.game-paused {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  text-align: center;
+  font-size: 15px;
+  z-index: 10;
+  background: radial-gradient(
+    780px at 37.8% 100.3%,
+    rgb(19, 55, 115) 2.2%,
+    rgb(32, 7, 80) 20.2%,
+    rgb(27, 88, 111) 58.6%,
+    rgb(115, 88, 44) 75%,
+    rgb(99, 19, 90) 89.6%,
+    rgb(12, 51, 76) 96.1%
+  );
+  padding: 4.5ch;
+  border-radius: 15px;
+}
+
+.game-over {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  text-align: center;
+  font-size: 15px;
+  z-index: 10;
+  background: radial-gradient(
+    780px at 37.8% 100.3%,
+    rgb(19, 55, 115) 2.2%,
+    rgb(32, 7, 80) 20.2%,
+    rgb(27, 88, 111) 58.6%,
+    rgb(115, 88, 44) 75%,
+    rgb(99, 19, 90) 89.6%,
+    rgb(12, 51, 76) 96.1%
+  );
+  padding: 6ch;
+  border-radius: 15px;
+}
+
+.winner-text {
+  font-size: 2rem; /* Bigger and bold text */
+  font-weight: bold; /* Emphasize the winner */
+  color: white; /* Bright color for the winner text */
+  letter-spacing: 2px; /* Slightly spaced letters */
+  text-transform: uppercase; /* Ensure uppercase text */
+  animation: slide-in 3s ease-out infinite; /* Adds a clean slide-in animation */
+  opacity: 0; /* Start invisible for the animation */
+}
+
+@keyframes slide-in {
+  0% {
+    transform: translateY(-50px); /* Start above the view */
+    opacity: 0; /* Fully transparent */
+  }
+  50% {
+    transform: translateY(10px); /* Slight bounce effect */
+    opacity: 0.8; /* Becoming visible */
+  }
+  100% {
+    transform: translateY(0); /* Settle in place */
+    opacity: 1; /* Fully visible */
+  }
+}
+
+.player-name-a,
+.player-name-b {
+  position: absolute;
+  font-size: 25px;
+  font-weight: bold;
+  color: white;
+}
+
+.player-name-a {
+  top: 30px;
+  left: 30px;
+}
+
+.player-name-b {
+  top: 30px;
+  right: 30px;
+}
+
+.player-info {
+  position: absolute;
+  bottom: 5px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  text-align: center;
+  font-size: 12px;
+}
+
+.glass-button-ready {
+  background: rgb(2, 0, 36);
+  background: radial-gradient(
+    780px at 37.8% 100.3%,
+    rgb(51, 116, 229) 2.2%,
+    rgb(32, 7, 80) 20.2%,
+    rgb(27, 88, 111) 58.6%,
+    rgb(115, 88, 44) 75%,
+    rgb(99, 19, 90) 89.6%,
+    rgb(12, 51, 76) 96.1%
+  );
+  border: 2px solid transparent; /* Transparent border for base */
+  border-radius: 8px; /* Rounds the corners */
+  color: #d6d6d6; /* Text color */
+  font-size: 1rem; /* Increases the font size */
+  padding: 12px 24px; /* Increases padding for a larger button */
+  position: relative; /* Ensures pseudo-elements align correctly */
+  overflow: hidden; /* Hides the animated border outside the button */
+  transition: all 0.3s ease;
+  font-weight: bold;
+}
+
+.glass-button-ready::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 2px solid lightskyblue;
+  border-radius: 8px;
+  box-sizing: border-box;
+  animation: border-circle 4s linear infinite;
+}
+
+@keyframes border-circle {
+  0% {
+    clip-path: polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%);
+  }
+  25% {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 0%, 0% 0%);
+  }
+  50% {
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 100% 100%);
+  }
+  75% {
+    clip-path: polygon(0% 100%, 100% 100%, 100% 100%, 0% 100%);
+  }
+  100% {
+    clip-path: polygon(0% 0%, 0% 0%, 0% 100%, 0% 100%);
+  }
+}
+
+.glass-button-ready:hover {
+  font-size: 1.3rem;
+}
+
+.lobby {
+  position: absolute;
+  top: 10px; /* Adjust as needed for spacing from the top */
+  left: 50%;
+  transform: translateX(-50%);
+  color: white;
+  font-size: 16px; /* Adjust font size as desired */
+  z-index: 10; /* Ensure it appears above other elements */
+}
+
+.countdown {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: white;
+  text-align: center;
+  font-size: 3.5rem;
+  font-weight: 700;
+  z-index: 10;
+  /* text-shadow: 0px 0px 15px rgba(255, 255, 255, 0.8), 0px 0px 30px rgba(255, 255, 255, 0.5); */
+  animation: pulse 1s infinite;
+  padding: 1ch;
+  background: radial-gradient(
+    780px at 37.8% 100.3%,
+    rgb(19, 55, 115) 2.2%,
+    rgb(32, 7, 80) 20.2%,
+    rgb(27, 88, 111) 58.6%,
+    rgb(115, 88, 44) 75%,
+    rgb(99, 19, 90) 89.6%,
+    rgb(12, 51, 76) 96.1%
+  );
+  border-radius: 20px;
+  box-shadow: 0px 5px 20px rgba(19, 55, 115, 0.6);
+}
+
+@keyframes pulse {
+  0% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(1.1);
+  }
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+  .overlap-group-wrapper {
+    width: 90%;
+    height: calc(90% * (600 / 1000));
+  }
+
+  .paddle-a,
+  .paddle-b {
+    width: 8px;
+    height: 80px;
+  }
+
+  .ball {
+    width: 16px;
+    height: 16px;
+  }
+
+  .score {
+    font-size: 20px;
+  }
+
+  .game-paused {
+    font-size: 24px;
+    padding: 15px;
+  }
+
+  .player-info {
+    font-size: 18px;
+    padding: 8px 16px;
+  }
+}
+
+.instruction {
+  font-size: 15px;
+  color: #d6d6d6;
+  font-style: italic;
+}
+
+.arrow-char {
+  font-size: 20px;
+}
